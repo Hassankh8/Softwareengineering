@@ -1,0 +1,30 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Env files
+.env
+
+# Virtual environments
+venv/
+env/
+.my_env/
+
+# Git
+.git/
+.gitignore
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Media (optional: if you don't want to copy uploads in image)
+media/
+
+# Static collected files (only if using collectstatic in production)
+staticfiles/
