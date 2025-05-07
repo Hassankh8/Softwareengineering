@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Media Search</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(120deg, #6a11cb, #2575fc);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 60px 20px;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 800px;
+    }
+
+    h1, h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    input[type="text"],
+    select {
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
+      width: 100%;
+    }
+
+    button {
+      padding: 12px;
+      background-color: #ffffff;
+      color: #2575fc;
+      border: none;
+      font-weight: bold;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #e6e6e6;
+    }
+
+    .media-results {
+      margin-top: 30px;
+    }
+
+    .media-item {
+      margin-bottom: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 15px;
+      border-radius: 10px;
+    }
+
+    .media-item img,
+    .media-item audio,
+    .media-item video {
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+    }
+
+    .top-right-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: white;
+      color: #2575fc;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background 0.3s ease;
+    }
+
+    .top-right-btn:hover {
+      background-color: #e0e0e0;
+    }
+  </style>
+</head>
+<body>
+
+  <a href="{% url 'search_history' %}?user_id={{ request.user.id }}" class="top-right-btn" id="historyBtn">📜 History</a>
+
+  <div class="container">
+    <h1>Search Media</h1>
+    <form id="searchForm" action="{% url 'media_search' %}" method="get">
+      <input type="text" name="query" placeholder="Search for images, audio or video" value="{{ query }}" required />
+      <select name="media_type">
+        <option value="image" {% if media_type == 'image' %}selected{% endif %}>Images</option>
+        <option value="audio" {% if media_type == 'audio' %}selected{% endif %}>Audio</option>
+        <option value="video" {% if media_type == 'video' %}selected{% endif %}>Videos</option>
+      </select>
+      <input type="hidden" name="user_id" id="user_id_input" />
+      <button type="submit">Search</button>
+    </form>
+
+    <div class="media-results">
+      {% if media_items %}
+        <h2>Results for "{{ query }}"</h2>
+        <div class="media-items">
+          {% for item in media_items %}
+            <div class="media-item">
+              {% if media_type == 'image' %}
+                <img src="{{ item.url }}" alt="Image" />
+              {% elif media_type == 'audio' %}
+                <audio controls>
+                  <source src="{{ item.url }}" type="audio/mpeg" />
+                  Your browser does not support the audio element.
+                </audio>
+              {% elif media_type == 'video' %}
+                <video controls>
+                  <source src="{{ item.url }}" type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p>No results found for "{{ query }}".</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const form = document.getElementById("searchForm");
+      const userId = localStorage.getItem("user_id");
+
+      form.addEventListener("submit", function () {
+        if (userId) {
+          document.getElementById("user_id_input").value = userId;
+        } else {
+          console.warn("user_id not found in localStorage!");
+        }
+      });
+
+      document.getElementById("historyBtn").addEventListener("click", function (e) {
+        e.preventDefault();
+        if (userId) {
+          window.location.href = `/search-history/?user_id=${userId}`;
+        } else {
+          alert("User ID not found. Please log in first.");
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>
